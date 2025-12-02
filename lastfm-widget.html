@@ -15,9 +15,9 @@
 
   <script>
   // ---- CONFIG ----
-  const LASTFM_USER = "boudewijn89"; // <-- invullen
-  const API_KEY = "66e8116fcf5e8781704236dd96f94ab6";      // <-- invullen
-  const REFRESH_MS = 30000; // elke 30s verversen
+  const LASTFM_USER = boudewijn89
+  const API_KEY = 66e8116fcf5e8781704236dd96f94ab6
+  const REFRESH_MS = 30000
 
   async function fetchLastfmTrack() {
     const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(LASTFM_USER)}&api_key=${API_KEY}&format=json&limit=1`;
