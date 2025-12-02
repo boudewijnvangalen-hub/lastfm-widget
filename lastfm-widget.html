@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Last.fm Now Playing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:10px;font-family:sans-serif;">
+  <div id="lastfm-widget" style="border: 1px solid #ddd; padding: 10px; max-width: 320px;">
+    <strong>Nu aan het luisteren:</strong>
+    <div id="lastfm-track" style="margin-top: 8px;">
+      <em>Laden…</em>
+    </div>
+  </div>
+
+  <script>
+  // ---- CONFIG ----
+  const LASTFM_USER = "boudewijn89"; // <-- invullen
+  const API_KEY = "66e8116fcf5e8781704236dd96f94ab6";      // <-- invullen
+  const REFRESH_MS = 30000; // elke 30s verversen
+
+  async function fetchLastfmTrack() {
+    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(LASTFM_USER)}&api_key=${API_KEY}&format=json&limit=1`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const container = document.getElementById("lastfm-track");
+
+      if (!data.recenttracks || !data.recenttracks.track || data.recenttracks.track.length === 0) {
+        container.innerHTML = "<em>Geen recente tracks gevonden.</em>";
+        return;
+      }
+
+      const track = data.recenttracks.track[0];
+
+      const artist = track.artist["#text"] || "Onbekende artiest";
+      const title = track.name || "Onbekende track";
+      const album = track.album && track.album["#text"] ? track.album["#text"] : "";
+      const trackUrl = track.url;
+      const image = track.image && track.image.length > 0
+        ? track.image[track.image.length - 1]["#text"] // grootste formaat
+        : null;
+
+      const nowPlaying = track["@attr"] && track["@attr"].nowplaying === "true";
+      const playingText = nowPlaying ? "▶️ Nu aan het spelen" : "⏺️ Onlangs afgespeeld";
+
+      let html = `<div style="display:flex; gap:10px; align-items:center;">`;
+
+      if (image) {
+        html += `<img src="${image}" alt="Album art" style="width: 64px; height: 64px; object-fit: cover;">`;
+      }
+
+      html += `<div style="flex:1;">`;
+      html += `<div style="font-size: 0.9em; color: #666;">${playingText}</div>`;
+      html += `<div style="font-weight:bold;"><a href="${trackUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:#000;">${title}</a></div>`;
+      html += `<div>${artist}</div>`;
+      if (album) {
+        html += `<div style="font-size: 0.9em; color: #666;">${album}</div>`;
+      }
+      html += `</div></div>`;
+
+      container.innerHTML = html;
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById("lastfm-track").innerHTML = "<em>Fout bij ophalen van Last.fm-data.</em>";
+    }
+  }
+
+  fetchLastfmTrack();
+  setInterval(fetchLastfmTrack, REFRESH_MS);
+  </script>
+</body>
+</html>
